@@ -3,6 +3,14 @@ from pymongo import MongoClient
 from dataclasses import dataclass, asdict
 from datetime import datetime
 
+import os 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+database_url = os.getenv('DATABASE_URL')
+database_name = os.getenv('MONGO_DB_NAME')
+
 @dataclass
 class UserPreferences:
 	timezone: str
@@ -43,7 +51,7 @@ def load_data(json_file):
           return users
      
 def import_data_to_mondgodb(data, db_name, collection_name):
-    client = MongoClient('<DataBaseUrl>') 
+    client = MongoClient(database_url) 
     db = client[db_name] 
     collection = db[collection_name] 
     collection.insert_many(data) 
@@ -52,7 +60,7 @@ def import_data_to_mondgodb(data, db_name, collection_name):
 if __name__== "__main__":
      json_file = '../../data/udata.json'
      data = load_data(json_file)
-     import_data_to_mondgodb(data, '<data_base_name>','users')
+     import_data_to_mondgodb(data, database_name,'users')
 
 
 # client = pymongo.MongoClient(<CONNECTION STRING>)

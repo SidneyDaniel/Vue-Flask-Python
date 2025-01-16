@@ -1,7 +1,10 @@
 <script lang="ts">
 import { useUsersStore } from '@/stores/userStore';
 import { computed, onMounted } from 'vue';
-import table from '@/components/HomeComponents/table.vue';
+import UserTable from '@/components/HomeComponents/userTable.vue';
+import UserToolbar from '@/components/HomeComponents/userToolbar.vue';
+import UserCards from '@/components/HomeComponents/userCards.vue';
+// import UserCards from '@/components/HomeComponents/userCards.vue';
 
 interface UserPreferences {
     timezone: string;
@@ -17,7 +20,7 @@ interface User {
     active: boolean;
 }
 
-export default{
+export default {
   name: 'Home',
   data(){
     return {
@@ -55,21 +58,21 @@ export default{
   },
   created(){
     this.getMessage()
+  },
+  components:{
+    UserTable,
+    UserToolbar,
+    UserCards
   }
 }
 
 </script>
 
 <template>
-  <main>
-    <!-- <h1>{{ user }}</h1> -->
-      <div v-if="loading">Loading...</div> 
-      <div v-if="error">{{ error}}</div>
-      <div v-for="users in user" :key="users.id">
-        <h1>{{ users.username }}</h1>
-      </div>
-
-      <table/>
-      
-  </main>
+  <main class="flex flex-col justify-center items-center">
+    <!-- <UserCards/> -->
+    <UserToolbar :user-data="user"/>
+    <UserTable :user-data="user" :loading="loading" :error="error"/>
+    
+ </main>
 </template>

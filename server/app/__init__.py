@@ -3,14 +3,22 @@ from flask_cors import CORS
 from pymongo.mongo_client import MongoClient 
 from pymongo.server_api import ServerApi
 
+import os 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+database_url = os.getenv('DATABASE_URL')
+database_name = os.getenv('MONGO_DB_NAME')
+
 app = Flask(__name__)
 app.config.from_object(__name__)
 
 CORS(app, resources={r'/*': {'origins': '*'}})
 
-uri = "<database_url>" 
+uri = database_url 
 client = MongoClient(uri, server_api=ServerApi('1')) 
-db = client['data_base_name']
+db = client[database_name]
 
 try: 
     client.admin.command('ping') 
