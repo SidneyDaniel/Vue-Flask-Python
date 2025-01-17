@@ -25,13 +25,14 @@ interface User {
 export default defineComponent({
     name: 'UserToolBar',
     props:{
-        userData: {
+        selectedUserData: {
             type: Array as PropType<User[]>,
             required: true
         },
     },
-    setup(props: UserProps){
-        const deleteConfirm = ref(false)
+    emits: ['clearProp', 'exportCSV'],
+    setup(){
+        const deleteUserDialog = ref(false)
         const creationConfirm = ref(false)
 
         const TZ = timezone.map((timez) => timez.name)
@@ -50,7 +51,7 @@ export default defineComponent({
         return {
             newUser,
             userDialog,
-            deleteConfirm,
+            deleteUserDialog,
             creationConfirm,
             TZ,
         }
@@ -66,7 +67,19 @@ export default defineComponent({
         },
         saveNewUser(){
          console.log('New Data',this.newUser.username,this.newUser.roles, this.newUser.preferences.timezone);     
-        },  
+        }, 
+         deleteUserData(){
+            const IDsToDelete = this.selectedUserData.map(val => (({username: val.username})));
+            this.deleteUserDialog = false;
+            console.log(IDsToDelete);
+            this.clearReceivedPro()
+        },
+        clearReceivedPro(){
+            this.$emit('clearProp')
+        },
+        exportCsv(){
+           this.$emit('exportCSV')
+        }
     }
 })
 </script>
@@ -75,14 +88,12 @@ export default defineComponent({
     <Toolbar class="mb-6 w-full">
         <template #start>
             <Button label="New" icon="pi pi-plus" class="mr-2" @click="openNew" />
-            <!-- <Button label="Delete" icon="pi pi-trash" severity="danger" outlined @click="confirmDeleteSelected"
-                :disabled="!selectedProducts || !selectedProducts.length" /> -->
+            <Button label="Delete" icon="pi pi-trash" severity="danger" outlined @click="deleteUserDialog = true"
+                :disabled="!selectedUserData || !selectedUserData.length" />
         </template>
 
         <template #end>
-            <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Import" customUpload
-                chooseLabel="Import" class="mr-2" auto :chooseButtonProps="{ severity: 'secondary' }" />
-            <!-- <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" /> -->
+            <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCsv" />
         </template>
     </Toolbar>
 
@@ -121,4 +132,17 @@ export default defineComponent({
             <Button label="Save" icon="pi pi-check" @click="saveNewUser" />
         </template>
     </Dialog>
+
+    <Dialog v-model:visible="deleteUserDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
+            <div class="flex items-center gap-4">
+                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <span v-if="selectedUserData.length === 1">Are you sure you want to delete the user <b>{{ selectedUserData[0].username }}</b>?</span>
+                <span v-else-if="selectedUserData.length > 1">Are you sure you want to delete all that data?</span>
+           </div>
+            <template #footer>
+                <Button label="No" icon="pi pi-times" text @click="deleteUserDialog = false" />
+                <Button label="Yes" icon="pi pi-check"  @click="deleteUserData"/>
+            </template>
+    </Dialog>
+
 </template>

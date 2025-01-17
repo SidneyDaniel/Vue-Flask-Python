@@ -2,9 +2,7 @@
 import { useUsersStore } from '@/stores/userStore';
 import { computed, onMounted } from 'vue';
 import UserTable from '@/components/HomeComponents/userTable.vue';
-import UserToolbar from '@/components/HomeComponents/userToolbar.vue';
 import UserCards from '@/components/HomeComponents/userCards.vue';
-// import UserCards from '@/components/HomeComponents/userCards.vue';
 
 interface UserPreferences {
     timezone: string;
@@ -61,7 +59,6 @@ export default {
   },
   components:{
     UserTable,
-    UserToolbar,
     UserCards
   }
 }
@@ -70,8 +67,7 @@ export default {
 
 <template>
   <main class="flex flex-col justify-center items-center">
-    <!-- <UserCards/> -->
-    <UserToolbar :user-data="user"/>
+    <UserCards :user-data="user" :loading="loading" :error="error"/>
     <UserTable :user-data="user" :loading="loading" :error="error"/>
     
  </main>
