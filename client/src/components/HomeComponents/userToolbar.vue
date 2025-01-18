@@ -1,6 +1,7 @@
 <script lang="ts">
 import { defineComponent, ref, type PropType } from 'vue';
 import timezone from '@/service/timezones';
+import CreateReadUpdateDelete from '@/service/crud';
 
 interface UserPreferences {
     timezone: string;
@@ -29,6 +30,14 @@ export default defineComponent({
             type: Array as PropType<User[]>,
             required: true
         },
+        loading: {
+            type: Boolean,
+            required: true
+        },
+        error: {
+            type: String as PropType<string | null>,
+            required: false
+        }
     },
     emits: ['clearProp', 'exportCSV'],
     setup(){
@@ -65,11 +74,28 @@ export default defineComponent({
         closeNew(){
             this.userDialog = false;
         },
-        saveNewUser(){
-         console.log('New Data',this.newUser.username,this.newUser.roles, this.newUser.preferences.timezone);     
+        async saveNewUser(){
+            try {
+                await new CreateReadUpdateDelete({
+                    username: this.newUser.username,
+                    roles: this.newUser.roles.map((role: { name: string }) => role.name),
+                    preferences: this.newUser.preferences
+                }).createUser()                
+            } catch (error) {
+                
+            }
+            console.log('New Data',this.newUser.username,this.newUser.roles, this.newUser.preferences.timezone);     
         }, 
-         deleteUserData(){
-            const IDsToDelete = this.selectedUserData.map(val => (({username: val.username})));
+         async deleteUserData(){
+            const IDsToDelete = this.selectedUserData.map(val => val.username);
+            try {
+                await new CreateReadUpdateDelete({
+                    listOfUsers: IDsToDelete,
+                }).deleteUser()                
+            } catch (error) {
+                
+            }
+            
             this.deleteUserDialog = false;
             console.log(IDsToDelete);
             this.clearReceivedPro()

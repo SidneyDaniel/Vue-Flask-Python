@@ -5,6 +5,7 @@ import UserToolbar from '@/components/HomeComponents/userToolbar.vue';
 import timezone from '@/service/timezones';
 
 import { FilterMatchMode } from '@primevue/core/api';
+import CreateReadUpdateDelete from "@/service/crud";
 
 interface UserPreferences {
     timezone: string;
@@ -26,6 +27,10 @@ interface UserProps {
     error: string | null
 }
 
+interface EditUser extends User {
+  currentUserName?: string; 
+}
+
 export default defineComponent({
   name: 'UserTable',
   props: {
@@ -44,7 +49,7 @@ export default defineComponent({
   },
   setup(props: UserProps) {
     const users: User[] = reactive([] as User[])
-    const selectedUsers = ref() 
+    const selectedUsers = ref([]) 
     const editUserDialog = ref(false)
     const dt = ref()
 
@@ -54,16 +59,15 @@ export default defineComponent({
 
     const TZ = timezone.map((timez) => timez.name)
 
-    const editUserData: Ref<User> = ref({
+    const editUserData: Ref<EditUser> = ref({
       username: '',
       password: '',
       roles: [],
       preferences: {timezone: ''},
       created_ts: 0,
-      active: false
+      active: false,
+      currentUserName: ''
     })
-
-    const  retrivedDataFromColum = ref()
 
     watch(() => props.userData, (value) => {
       const arrayUsers = value 
@@ -153,20 +157,35 @@ export default defineComponent({
       // <"secondary" | "success" | "info" | "warn" | "danger" | "contrast"> 
     },
     clearProp(){
-      this.selectedUsers = null 
+      this.selectedUsers = [] 
     },
     openEditUser(eUser: User){
       // this.editUserData = {...eUser}
       this.editUserData = JSON.parse(JSON.stringify(eUser))
+      this.editUserData.currentUserName = eUser.username
       this.editUserDialog = true;
     },
-    saveEditData(){
+    async saveEditData(){
+      try {
+        await new CreateReadUpdateDelete({
+          username: this.editUserData.username,
+          password: this.editUserData.password,
+          roles: this.editUserData.roles,
+          preferences: this.editUserData.preferences,
+          active: this.editUserData.active,
+          currentUserName: this.editUserData.currentUserName, 
+        }).updateUser()
+      } catch (error) {
+
+      }
       console.log('Edited User Data:');
       console.log('Username: ' + this.editUserData.username);
       console.log('Password: ' + this.editUserData.password);
       console.log('Roles: ' + this.editUserData.roles.join(', '));
       console.log('Timezone: ' + this.editUserData.preferences.timezone);
       console.log('Active Status: ' + this.editUserData.active);
+      console.log('Current User: ' + this.editUserData.currentUserName);
+      
       console.log('Last Updated: ' + Date.now()); 
     }
   },
@@ -182,7 +201,7 @@ export default defineComponent({
     @exportCSV="exportCSV" />
 
   <div class="flex flex-row gap-6 w-full max-w-fit bg-white">
-    <DataTable ref="dt" :value="users" :rows="4" tableStyle="min-width: 70rem" class="min-h-[70vh]" :filters="filters"
+    <DataTable ref="dt" :value="users" removableSort  tableStyle="min-width: 70rem" class="min-h-[70vh]" :filters="filters"
       v-model:selection="selectedUsers" :exportable="true">
 
       <template #header>
@@ -200,7 +219,7 @@ export default defineComponent({
 
       <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
 
-      <Column field="username" header="Name" style="width: 25%"></Column>
+      <Column field="username" sortable header="Name" style="width: 25%"></Column>
 
       <Column field="roles" header="Role" style="width: 25%">
         <template #body="{ data }">
@@ -213,7 +232,7 @@ export default defineComponent({
 
       <Column field="preferences" header="Timezone" style="width: 25%">
         <template #body="{ data }">
-          <Badge :value="data.preferences.timezone" severity="contrast" size="small"></Badge>
+          <Badge :value="data.preferences?.timezone" severity="contrast" size="small"></Badge>
         </template>
       </Column>
 
@@ -227,7 +246,7 @@ export default defineComponent({
 
       </Column>
 
-      <Column field="created_ts" header="Created At">
+      <Column field="created_ts" sortable header="Created At">
         <template #body="{ data }">
           <Tag :value="formatDate(data.created_ts)" severity="info" style="width: 100%;" />
         </template>

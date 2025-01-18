@@ -27,9 +27,10 @@ export const useUsersStore = defineStore('userStore', {
         this.loading = true
         this.error = null
         try {
-          const response: Response = await fetch('http://localhost:5001/users')
+          const response: Response = await fetch('http://localhost:5001/getUsers')
           
           const data = await response.json()
+          console.log(data);
           
           if (!response.ok) {throw new Error('Erro ao buscar dados')}
           

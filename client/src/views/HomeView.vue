@@ -44,7 +44,7 @@ export default {
   methods: {
     async getMessage(){
       try {
-        const response: Response = await fetch('http://localhost:5001/users')
+        const response: Response = await fetch('http://localhost:5001/getUsers')
         const data = await response.json()
         console.log(data);
         // this.msg = response.text()

@@ -1,131 +1,135 @@
 // import { coommitBooks } from '@/utils/commitBooks';
 
 class CreateReadUpdateDelete {
-    public userName?: string
-    public publisher?: string
-    public author?:  string
-    public pages?: string
-    public cover?: string
-    public readLink?: string
-    public currentTitle?: string | null
+    public listOfUsers?: string[]
+    public username?: string
+    public password?: string
+    public roles?: string[]
+    public preferences?:  {timezone: string}
+    public active?: boolean
+    public currentUserName?: string
     
-    constructor(params: {title?: string, publisher?: string, author?: string, pages?: string,cover?: string,readLink?: string, currentTitle?: string}){
-        this.title = params.title
-        this.publisher = params.publisher
-        this.author = params.author
-        this.pages = params.pages
-        this.cover = params.cover 
-        this.readLink = params.readLink
-        this.currentTitle = params.currentTitle
+    constructor(params: {
+        listOfUsers?: string[] ,
+        username?: string, 
+        password?: string,
+        roles?: string[],
+        preferences?: {timezone: string},
+        active?: boolean,
+        currentUserName?: string
+    }){
+        this.listOfUsers = params.listOfUsers
+        this.username = params.username
+        this.password = params.password
+        this.roles = params.roles
+        this.preferences = params.preferences
+        this.active = params.active
+        this.currentUserName = params.currentUserName
     } 
 
-    public createUser() {
+    public async createUser() {
+        
+        const today = new Date().getTime() / 1000
+        
+        const generatePassword = (length: number) => {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+            let password = ''; 
+            for (let i = 0; i < length; i++) { 
+                const randomIndex = Math.floor(Math.random() * characters.length)
+                password += characters[randomIndex]
+            } 
+            return password
+        }
+        
+
         try {
-            fetch('addBook', {
+            const response = await fetch('http://localhost:5001/addUser', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    bookName: this.title,
-                    bookAuthor: this.author,
-                    bookPublisher: this.publisher,
-                    numberOfPages: this.pages,
-                    readLink: this.readLink,
-                    bookCover: this.cover
+                    username: this.username,
+                    password: generatePassword(10),
+                    roles: this.roles,
+                    preferences: this.preferences,
+                    created_ts: today,
+                    active: false,
                 })
-            }).then(async response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    console.log(response.url);
-                    alert("Não Autorizado!")
-                } else {
-                    // await bookStore.$reset()
-                    // await bookStore.fetchBooks()
-                    // const a = await bookStore.books
-                    // await bookStore.$patch({books: a })
-                    coommitBooks()
-                    console.log("autorizado");
-                    // await bookStore.fetchBooks()
-                    return response
                 }
-            })
-            .then(response => response?.json())
-            .then(data => {
-                console.log(data);
-                alert(data.message)
-            })
-        } catch (error) {
-            return error
-        } 
-    }
+            )
 
-    public editUser() {
+            if (!response.ok) {throw new Error('Error to create user')}
+
+            return response
+
+        } catch (error) {
+            return (error as Error).message
+
+        }
+    }
+       
+
+    public async updateUser() {        
         try {
-            fetch('editBook', {
+            const response = await fetch('http://localhost:5001/updateUser', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    newBookName: this.title,
-                    newBookauthor: this.author,
-                    newBookPublisher: this.publisher,
-                    newBookPages: this.pages,
-                    newReadLink: this.readLink,
-                    newBookCover: this.cover,
-                    currentTitle: this.currentTitle,
+                    username: this.username ,
+                    password: this.password,
+                    roles: this.roles,
+                    preferences: this.preferences,
+                    active: this.active ,
+                    currentUserName: this.currentUserName, 
                 })
-            }).then(async response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    console.log(response.url);
-                    alert("Não Autorizado!")
-                } else {
-                    coommitBooks()
-                    console.log("autorizado");
-                    return response
                 }
-            })
-            .then(response => response?.json())
-            .then(data => {
-                console.log(data);
-                alert(data.message)
-            })
+            )
+
+            if (!response.ok) {throw new Error('Error to create user')}
+
+            return response
         } catch (error) {
-            return error
-        } 
+            return (error as Error).message
+        }finally{
+
+        }
     }
 
-    public deleteUser() {
+    public async deleteUser() {
         try {
-            fetch('removeBook', {
+            const response = await fetch('http://localhost:5001/deleteUsers', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    title: this.currentTitle,
+                    listOfUsers: this.listOfUsers
                 })
-            }).then(async response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    console.log(response.url);
-                    alert("Não Autorizado! ")
-                } else {
-                    coommitBooks()
-                    console.log("autorizado");
-                    return response
                 }
-            })
-            .then(response => response?.json())
-            .then(data => {
-                console.log(data);
-                alert(data.message)
-                return data
-            })
+            )
+
+            if (!response.ok) {throw new Error('Error to delete user')}
+
+            return response
         } catch (error) {
-            return error
+            return (error as Error).message
+        } finally {
+
+        }
+    }
+
+    public async getUsers() {
+        try {
+            const response: Response = await fetch('http://localhost:5001/getUsers')
+
+            if (!response.ok) {throw new Error('Erro ao buscar dados')}
+
+            return response
+        } catch (error) {
+             return (error as Error).message
         } 
     }
 }
