@@ -1,18 +1,5 @@
 import {defineStore } from "pinia";
-
-interface UserPreferences {
-    timezone: string;
-}
-  
-interface User {
-    id: string;
-    username: string;
-    password: string;
-    roles: string[];
-    preferences: UserPreferences;
-    created_ts: number;
-    active: boolean;
-}
+import type { User } from "@/types/users";
   
 export const useUsersStore = defineStore('userStore', {
     state: () => ({

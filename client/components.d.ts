@@ -13,6 +13,7 @@ declare module 'vue' {
     Column: typeof import('primevue/column')['default']
     DataTable: typeof import('primevue/datatable')['default']
     Dialog: typeof import('primevue/dialog')['default']
+    EditUserDialog: typeof import('./src/components/HomeComponents/dialogs/editUserDialog.vue')['default']
     FileUpload: typeof import('primevue/fileupload')['default']
     IconField: typeof import('primevue/iconfield')['default']
     InputIcon: typeof import('primevue/inputicon')['default']
@@ -32,6 +33,7 @@ declare module 'vue' {
     Toast: typeof import('primevue/toast')['default']
     Toolbar: typeof import('primevue/toolbar')['default']
     UserCards: typeof import('./src/components/HomeComponents/userCards.vue')['default']
+    UserPage: typeof import('./src/components/UserComponents/UserPage.vue')['default']
     UserTable: typeof import('./src/components/HomeComponents/userTable.vue')['default']
     UserToolbar: typeof import('./src/components/HomeComponents/userToolbar.vue')['default']
   }

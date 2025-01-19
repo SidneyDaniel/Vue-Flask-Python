@@ -10,6 +10,7 @@ export interface User {
     preferences: UserPreferences;
     created_ts: number;
     active: boolean;
+    updated_at?: number
 }
 
 export interface UserProps {

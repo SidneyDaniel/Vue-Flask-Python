@@ -61,7 +61,7 @@ export default defineComponent({
         roles: user.roles.length > 0 ? user.roles : ['none'],
         preferences: user.preferences,
         active: user.active,
-        lastUpdate: '',
+        updated_at: user.updated_at,
         created_ts: user.created_ts,
       }))  
 
@@ -184,9 +184,8 @@ export default defineComponent({
     @exportCSV="exportCSV" />
 
   <div class="flex flex-row gap-6 w-full max-w-fit bg-white">
-    <DataTable ref="dt" :value="users" removableSort tableStyle="min-width: 70rem" class="min-h-[70vh]"
-      :filters="filters" v-model:selection="selectedUsers" :exportable="true">
-
+    <DataTable ref="dt" :value="users" removableSort tableStyle="max-width: 70rem" class="min-h-[70vh] max-lg:!w-[95vw]"
+      :filters="filters" v-model:selection="selectedUsers" :exportable="true" id="dt-responsive-table">
       <template #header>
         <div class="flex justify-self-end">
           <IconField>
@@ -229,19 +228,19 @@ export default defineComponent({
         </template>
       </Column>
 
-      <Column field="lastUpdate" header="Update At">
-
+      <Column field="updated_at" header="Update At" style="width: 25%">
+        <template #body="{ data }">
+          <Tag :value="data.updated_at ? formatDate(data.updated_at):  'No change'" severity="info" style="width: 100%;" />
+        </template>
       </Column>
 
-      <Column field="created_ts" sortable header="Created At">
+      <Column field="created_ts" sortable header="Created At" style="width: 25%">
         <template #body="{ data }">
           <Tag :value="formatDate(data.created_ts)" severity="info" style="width: 100%;" />
         </template>
       </Column>
 
-      <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center"></Column>
-
-      <Column :exportable="false" style="min-width: 12rem" header="Edit User">
+      <Column :exportable="false" style="min-width: 7rem" header="Edit User">
         <template #body="{data}">
           <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="openEditUser(data)" />
         </template>
@@ -310,5 +309,50 @@ export default defineComponent({
   border: 1px solid var(--p-content-border-color);
   border-radius: var(--p-border-radius-xl);
   padding: 0.3rem;
+}
+
+
+@media (max-width: 1024px) {
+    #dt-responsive-table table {
+        width: 100% !important;
+    }
+
+    #dt-responsive-table table thead {
+        display: none !important; 
+    }
+
+    #dt-responsive-table table tbody tr td {
+      width: 100% !important;
+    }
+
+    #dt-responsive-table table tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        align-items: stretch !important;
+        min-height: auto !important; 
+    }
+
+    #dt-responsive-table table tbody tr {
+        border: 1px solid #ccc !important;
+        border-radius: 8px !important;
+        margin-bottom: 1rem !important;
+        background-color: #fff !important;
+        padding: 1rem !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    #dt-responsive-table table tbody td {
+        margin: 0.5rem 0 !important;
+    }
+
+    #dt-responsive-table table tbody tr {
+        display: table-row !important;
+    }
+
+    #dt-responsive-table table tbody td {
+        display: block !important;
+        margin: 0.5rem 0 !important;
+    }
 }
 </style>

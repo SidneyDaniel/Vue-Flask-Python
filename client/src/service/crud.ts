@@ -79,7 +79,9 @@ class CreateReadUpdateDelete {
         }
     }
        
-    public async updateUser() {        
+    public async updateUser() {          
+        const today = new Date().getTime() / 1000
+
         try {
             const response = await fetch('http://localhost:5001/updateUser', {
                 method: 'PUT',
@@ -93,6 +95,7 @@ class CreateReadUpdateDelete {
                     preferences: this.preferences,
                     active: this.active ,
                     currentUserName: this.currentUserName, 
+                    updated_at: today
                 })
                 }
             )

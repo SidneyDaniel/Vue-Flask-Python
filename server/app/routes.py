@@ -58,7 +58,8 @@ def update_user():
             'password': data.get('password'), 
             'roles': data.get('roles'), 
             'preferences': data.get('preferences'),
-            'active': data.get('active')
+            'active': data.get('active'),
+            'updated_at': data.get('updated_at')
         }
         result = db.users.update_one(
             {'username': current_user_name},
