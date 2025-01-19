@@ -1,4 +1,4 @@
-// import { coommitBooks } from '@/utils/commitBooks';
+import { useUsersStore } from '@/stores/userStore';
 
 class CreateReadUpdateDelete {
     public listOfUsers?: string[]
@@ -26,6 +26,14 @@ class CreateReadUpdateDelete {
         this.active = params.active
         this.currentUserName = params.currentUserName
     } 
+
+    private async  comitUsers() {
+        const userStore = useUsersStore()
+        userStore.$reset()
+        await userStore.fetchUser()
+        const newCommitedUsers = userStore.users
+        userStore.$patch({ users: newCommitedUsers })
+    }
 
     public async createUser() {
         
@@ -61,6 +69,8 @@ class CreateReadUpdateDelete {
 
             if (!response.ok) {throw new Error('Error to create user')}
 
+            this.comitUsers()
+
             return response
 
         } catch (error) {
@@ -69,7 +79,6 @@ class CreateReadUpdateDelete {
         }
     }
        
-
     public async updateUser() {        
         try {
             const response = await fetch('http://localhost:5001/updateUser', {
@@ -90,11 +99,11 @@ class CreateReadUpdateDelete {
 
             if (!response.ok) {throw new Error('Error to create user')}
 
+            this.comitUsers()
+
             return response
         } catch (error) {
             return (error as Error).message
-        }finally{
-
         }
     }
 
@@ -113,12 +122,12 @@ class CreateReadUpdateDelete {
 
             if (!response.ok) {throw new Error('Error to delete user')}
 
+            this.comitUsers()
+
             return response
         } catch (error) {
             return (error as Error).message
-        } finally {
-
-        }
+        } 
     }
 
     public async getUsers() {

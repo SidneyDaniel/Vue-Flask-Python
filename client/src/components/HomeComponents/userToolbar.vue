@@ -1,27 +1,12 @@
 <script lang="ts">
 import { defineComponent, ref, type PropType } from 'vue';
+
 import timezone from '@/service/timezones';
 import CreateReadUpdateDelete from '@/service/crud';
 
-interface UserPreferences {
-    timezone: string;
-}
-  
-interface UserProps {
-    userData: User[], 
-    loading: boolean,
-    error: string | null
-}
+import type { User } from "@/types/users";
 
-interface User {
-    id?: string;
-    username: string;
-    password?: string;
-    roles: string[];
-    preferences: UserPreferences;
-    created_ts: number;
-    active: boolean;
-}
+import { useToast } from 'primevue';
 
 export default defineComponent({
     name: 'UserToolBar',
@@ -44,6 +29,8 @@ export default defineComponent({
         const deleteUserDialog = ref(false)
         const creationConfirm = ref(false)
 
+        const toast = useToast();
+
         const TZ = timezone.map((timez) => timez.name)
 
         const newUser = ref({
@@ -63,12 +50,11 @@ export default defineComponent({
             deleteUserDialog,
             creationConfirm,
             TZ,
+            toast,
         }
     },
     methods:{
         openNew(){
-            // this.newUser = {};
-            // submitted = false;
             this.userDialog = true;
         },
         closeNew(){
@@ -76,29 +62,45 @@ export default defineComponent({
         },
         async saveNewUser(){
             try {
-                await new CreateReadUpdateDelete({
+                const response = await new CreateReadUpdateDelete({
                     username: this.newUser.username,
                     roles: this.newUser.roles.map((role: { name: string }) => role.name),
                     preferences: this.newUser.preferences
-                }).createUser()                
-            } catch (error) {
+                }).createUser()   
                 
+                if (!(response as Response).ok) {throw new Error('Error to create user')}
+
+                this.toast.add({ severity: 'success', summary: 'New User added', detail: `User, ${this.newUser.username} has been created!`, life: 3000 });
+
+                this.userDialog = false
+
+                return response
+            } catch (error) {
+                return (error as Error).message
             }
-            console.log('New Data',this.newUser.username,this.newUser.roles, this.newUser.preferences.timezone);     
         }, 
          async deleteUserData(){
             const IDsToDelete = this.selectedUserData.map(val => val.username);
             try {
-                await new CreateReadUpdateDelete({
+                const response = await new CreateReadUpdateDelete({
                     listOfUsers: IDsToDelete,
-                }).deleteUser()                
-            } catch (error) {
+                }).deleteUser() 
                 
-            }
-            
-            this.deleteUserDialog = false;
-            console.log(IDsToDelete);
-            this.clearReceivedPro()
+                if (!(response as Response).ok) {throw new Error('Error to delete user')}
+
+                this.toast.add({ 
+                    severity: 'warn', 
+                    summary: 'User deleted', detail: `${IDsToDelete.length > 1 ? 'Multiple users have been successfully deleted.' : 'The user has been successfully deleted.'}`, 
+                    life: 3000 
+                });
+
+                return response
+            } catch (error) {
+                return (error as Error).message
+            } finally {
+                this.deleteUserDialog = false;
+                this.clearReceivedPro()
+            } 
         },
         clearReceivedPro(){
             this.$emit('clearProp')
@@ -111,7 +113,7 @@ export default defineComponent({
 </script>
 
 <template>
-    <Toolbar class="mb-6 w-full">
+    <Toolbar class="mb-6 !rounded-xl w-full">
         <template #start>
             <Button label="New" icon="pi pi-plus" class="mr-2" @click="openNew" />
             <Button label="Delete" icon="pi pi-trash" severity="danger" outlined @click="deleteUserDialog = true"

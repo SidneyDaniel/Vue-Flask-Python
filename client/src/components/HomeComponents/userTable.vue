@@ -1,31 +1,14 @@
 <script lang="ts">
 import { watch, reactive, defineComponent, type PropType, ref, type Ref} from "vue";
-import UserToolbar from '@/components/HomeComponents/userToolbar.vue';
-// import { exportCSV } from "@primevue/core";
-import timezone from '@/service/timezones';
 
-import { FilterMatchMode } from '@primevue/core/api';
+import UserToolbar from '@/components/HomeComponents/userToolbar.vue';
+import timezone from '@/service/timezones';
 import CreateReadUpdateDelete from "@/service/crud";
 
-interface UserPreferences {
-    timezone: string;
-}
-  
-interface User {
-    id?: string;
-    username: string;
-    password?: string;
-    roles: string[];
-    preferences: UserPreferences;
-    created_ts: number;
-    active: boolean;
-}
+import type { User, UserProps } from "@/types/users";
 
-interface UserProps {
-    userData: User[], 
-    loading: boolean,
-    error: string | null
-}
+import { FilterMatchMode } from '@primevue/core/api';
+import { useToast } from "primevue";
 
 interface EditUser extends User {
   currentUserName?: string; 
@@ -52,6 +35,8 @@ export default defineComponent({
     const selectedUsers = ref([]) 
     const editUserDialog = ref(false)
     const dt = ref()
+
+    const toast = useToast();
 
     const exportCSV = () => {
         dt.value.exportCSV();
@@ -97,7 +82,7 @@ export default defineComponent({
     initFilters();
 
     return {
-        users, filters, selectedUsers, dt , editUserDialog, editUserData, TZ, exportCSV
+        users, filters, selectedUsers, dt , editUserDialog, editUserData, TZ, exportCSV, toast
     };
   },
   methods:{
@@ -160,14 +145,13 @@ export default defineComponent({
       this.selectedUsers = [] 
     },
     openEditUser(eUser: User){
-      // this.editUserData = {...eUser}
       this.editUserData = JSON.parse(JSON.stringify(eUser))
       this.editUserData.currentUserName = eUser.username
       this.editUserDialog = true;
     },
     async saveEditData(){
       try {
-        await new CreateReadUpdateDelete({
+        const response = await new CreateReadUpdateDelete({
           username: this.editUserData.username,
           password: this.editUserData.password,
           roles: this.editUserData.roles,
@@ -175,18 +159,17 @@ export default defineComponent({
           active: this.editUserData.active,
           currentUserName: this.editUserData.currentUserName, 
         }).updateUser()
-      } catch (error) {
 
+        if (!(response as Response).ok) {throw new Error('Error to edit user')}
+
+        this.toast.add({ severity: 'success', summary: 'User updated sucefully', detail: `User, ${this.editUserData.currentUserName} has been updated!`, life: 3000 });
+
+        this.editUserDialog = false
+
+        return response
+      } catch (error) {
+        return (error as Error).message
       }
-      console.log('Edited User Data:');
-      console.log('Username: ' + this.editUserData.username);
-      console.log('Password: ' + this.editUserData.password);
-      console.log('Roles: ' + this.editUserData.roles.join(', '));
-      console.log('Timezone: ' + this.editUserData.preferences.timezone);
-      console.log('Active Status: ' + this.editUserData.active);
-      console.log('Current User: ' + this.editUserData.currentUserName);
-      
-      console.log('Last Updated: ' + Date.now()); 
     }
   },
   components:{
@@ -201,8 +184,8 @@ export default defineComponent({
     @exportCSV="exportCSV" />
 
   <div class="flex flex-row gap-6 w-full max-w-fit bg-white">
-    <DataTable ref="dt" :value="users" removableSort  tableStyle="min-width: 70rem" class="min-h-[70vh]" :filters="filters"
-      v-model:selection="selectedUsers" :exportable="true">
+    <DataTable ref="dt" :value="users" removableSort tableStyle="min-width: 70rem" class="min-h-[70vh]"
+      :filters="filters" v-model:selection="selectedUsers" :exportable="true">
 
       <template #header>
         <div class="flex justify-self-end">
@@ -215,7 +198,11 @@ export default defineComponent({
         </div>
       </template>
 
-      <template #empty> No User found. </template>
+      <template #empty>
+        <div v-if="loading" class="h-screen w-full flex justify-center items-center">
+          <div class="w-20 h-20 border-4 border-t-blue-500 border-gray-300 rounded-full animate-spin"></div>
+        </div>
+      </template>
 
       <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
 
@@ -257,7 +244,6 @@ export default defineComponent({
       <Column :exportable="false" style="min-width: 12rem" header="Edit User">
         <template #body="{data}">
           <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="openEditUser(data)" />
-          <!-- <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteProduct(slotProps.data)" /> -->
         </template>
       </Column>
 
@@ -316,10 +302,6 @@ export default defineComponent({
 </template>
 
 <style>
-/* .p-datatable-column-title {
-    color: var(--p-primary-color);
-} */
-
 .p-datatable-header {
     color: var(--p-primary-color) !important;
 }
@@ -328,9 +310,5 @@ export default defineComponent({
   border: 1px solid var(--p-content-border-color);
   border-radius: var(--p-border-radius-xl);
   padding: 0.3rem;
-}
-
-.p-paginator{
-  padding: 0.3rem 1rem !important;
 }
 </style>

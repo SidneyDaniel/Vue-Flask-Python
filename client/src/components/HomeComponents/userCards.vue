@@ -1,27 +1,7 @@
 <script lang="ts">
 import type { MeterItem } from 'primevue';
 import { defineComponent, ref, watch, type PropType } from 'vue';
-
-interface UserPreferences {
-    timezone: string;
-}
-  
-interface UserProps {
-    userData: User[], 
-    loading: boolean,
-    error: string | null
-}
-
-
-interface User {
-    id?: string;
-    username: string;
-    password?: string;
-    roles: string[];
-    preferences: UserPreferences;
-    created_ts: number;
-    active: boolean;
-}
+import type { User, UserProps } from "@/types/users";
 
 export default defineComponent({
     name: 'UserCards',
@@ -55,12 +35,7 @@ export default defineComponent({
                         }
                         return acc
                 }, {trueCount: 0 , falseCount: 0})
-    
-                // const latestUser = props.userData.map((user)=> user)
-                //     .slice()
-                //     .sort((a,b)=> b.created_ts - a.created_ts)[0]
-                // console.log(latestUser);
-                
+                    
                 dataCards.value = [
                     { label: 'N° Of Users', color: '#34d399', value: numberOfUsers, icon: 'pi pi-users' },
                     { label: 'Actives', color: '#fbbf24', value: numberOfActives.trueCount, icon: 'pi pi-verified' },

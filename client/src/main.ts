@@ -53,7 +53,4 @@ app.use(PrimeVue, {
     }
 });
 
-
 app.use(router).mount('#app')
-
-// app.mount('#app')
