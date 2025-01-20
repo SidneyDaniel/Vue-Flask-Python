@@ -169,7 +169,7 @@ Here we need to activate the enviroment:
 
 > Mac/Linux
 ```bash
-   .env/bin/activate
+   . .env/bin/activate
 ```
 
 > **<span style="color:#788dda"> Obs: </span>** On Windows, you might encounter issues starting the virtual environment due to **<span style="color:#788dda"> PowerSheel </span>**, as it requires script execution permission. Therefore, I recommend switching to the **<span style="color:#788dda"> Command Prompt </span>** , which in my view, makes things much easier.
@@ -200,7 +200,7 @@ After creating the server, we will only need three things. In the root of the pr
 
 ```bash
    DATABASE_URL=<YourDBURL>
-   MONGO_DB_NAME=user_data
+   MONGO_DB_NAME=users_data
 ```
 
 Alright, you've created your database and added the variables. Now we just need to add data to the database, and that's easy.
