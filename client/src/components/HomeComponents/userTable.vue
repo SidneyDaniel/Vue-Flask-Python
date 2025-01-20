@@ -36,6 +36,7 @@ export default defineComponent({
     const editUserDialog = ref(false)
     const dt = ref()
 
+    const confirm = ref(false);
     const toast = useToast();
 
     const exportCSV = () => {
@@ -82,7 +83,7 @@ export default defineComponent({
     initFilters();
 
     return {
-        users, filters, selectedUsers, dt , editUserDialog, editUserData, TZ, exportCSV, toast
+        users, filters, selectedUsers, dt , editUserDialog, editUserData, TZ, exportCSV, toast, confirm 
     };
   },
   methods:{
@@ -165,7 +166,7 @@ export default defineComponent({
         this.toast.add({ severity: 'success', summary: 'User updated sucefully', detail: `User, ${this.editUserData.currentUserName} has been updated!`, life: 3000 });
 
         this.editUserDialog = false
-
+        this.confirm = false
         return response
       } catch (error) {
         return (error as Error).message
@@ -294,9 +295,21 @@ export default defineComponent({
 
       <template #footer>
         <Button label="Cancel" icon="pi pi-times" text @click="editUserDialog = false" />
-        <Button label="Save" icon="pi pi-check" @click="saveEditData" />
+        <Button label="Save" icon="pi pi-check" @click="confirm = true" />
       </template>
     </Dialog>
+
+    <Dialog v-model:visible="confirm" :style="{ width: '450px' }" header="Confirm" :modal="true">
+            <div class="flex items-center gap-4">
+                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <span>Are you sure you want to edit the user <b>{{ editUserData.currentUserName }}</b>?</span>
+           </div>
+            <template #footer>
+                <Button label="No" icon="pi pi-times" text @click="confirm = false" />
+                <Button label="Yes" icon="pi pi-check"  @click="saveEditData"/>
+            </template>
+    </Dialog>
+
   </div>
 </template>
 
