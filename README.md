@@ -203,6 +203,18 @@ After creating the server, we will only need three things. In the root of the pr
    MONGO_DB_NAME=users_data
 ```
 
+**<span style="color:orange"> Warning  </span>**, if you are on Linux and have any issues using environment variables, add them temporarily to the terminal session or permanently, but honestly, just add them temporarily.
+
+Add this: 
+
+```bash
+   export DATABASE_URL="<YourDBURL>"
+```
+
+```bash
+   export MONGO_DB_NAME=users_data
+```
+
 Alright, you've created your database and added the variables. Now we just need to add data to the database, and that's easy.
 
 First, navigate to the app folder. In the terminal, within the server directory, type:
